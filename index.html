@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- External CSS and JavaScript -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    
+    <title>TEAM O O O</title>
+    
+    <style>
+        #demo, #gift-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        label {
+            font-weight: bold;
+        }
+        
+        textarea {
+            resize: none;
+            height: 80px;
+        }
+
+        .result-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background-color: #fff;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .result-card img {
+            max-width: 100px;
+            height: auto;
+            display: block;
+            margin: 10px auto;
+        }
+
+        .result-card .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+
+        .result-card .error {
+            color: #dc3545;
+            font-weight: bold;
+        }
+
+        .result-details {
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .result-card h4 {
+            color: #007bff;
+            margin-bottom: 10px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="text-center">AUTO đập heo & Tạo lì xì (zalo: 0762937629 Ven Ohayo)</h1>
+        
+        <!-- Item Selection -->
+        <div class="form-group">
+            <label for="itemComboBox">Chọn Item muốn tạo lì xì hoặc muốn mở lì xì cuối (nếu chưa tạo thành không lì xì thì không mở được):</label>
+            <select id="itemComboBox" class="form-control">
+                <option value="24">Vest 2 màu, khiêu vũ thắt, eo Rhythm Fireworks</option>
+                <option value="25">Áo yếm cách, tân hàng hiệu, Chanel Revolution</option>
+                <option value="43">Tóc bạch kim, soái ca lạnh, lùng McDonagh</option>
+                <option value="44">Tóc bạc khói, kính đen cool, Bounty Hunter</option>
+                <option value="45">Giày thể thao, nâu cổ điển, Roasted Coffee</option>
+                <option value="46">Giày leo núi, vải lưới Gwenni, LA Dodgers</option>
+                <option value="47">Quần caro suông, thắt lưng, Plaid Flared</option>
+                <option value="48">Váy caro xanh, nữ học sinh, Kensley Scholar</option>
+                <option value="49">Vest cao bồi, quần tây vingate, That That</option>
+                <option value="50">Váy yếm cổ, lọ mùa đông, Orenji Keimi</option>
+            </select>
+        </div>
+
+        <!-- Control Buttons -->
+        <div class="text-center">
+            <button onclick="startSendingRequests('pig')" class="btn btn-success">Đập Heo</button>
+            <button onclick="startSendingRequests('gift')" class="btn btn-primary">Tạo Lì Xì</button>
+            <button onclick="startSendingRequests('open')" class="btn btn-default">Mở Lì Xì</button>
+            <button onclick="stopSendingRequests()" class="btn btn-danger">Dừng tất cả</button>
+        </div>
+
+        <!-- Response Areas -->
+        <div class="row mt-4">
+            <div class="col-md-4">
+                <div class="result-card">
+                    <h4>Kết Quả Đập Heo</h4>
+                    <div id="responseArea1"></div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="result-card">
+                    <h4>Kết Quả Tạo Lì Xì</h4>
+                    <div id="responseArea2"></div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="result-card">
+                    <h4>Kết Quả Mở Lì Xì</h4>
+                    <div id="responseArea3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const bearerToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1bmlxdWVfbmFtZSI6IlNET0lNcXpoTEl0dEN5R2dwODFUTE5YWjFoT1ZYVm1Cb1FFR2N4VnFXdFFXaU0wQjlQdWZzVW5TMFpBL2lLVHRFakNzMU9PczN0TUlqVStFZzNqWEt5SkM5R0pMdXU3SmRRVnJkd0RwVWQ4RXJQMXFpMTZuQmYxcG5iUG1WZ1NaU1JyM3N0bGgzT09CWnFsU2ZOVjJOZz09IiwibmJmIjoxNzM3OTQ5Nzc0LCJleHAiOjE3MzgwMzYxNzQsImlhdCI6MTczNzk0OTc3NH0.EDJfd3823x5K8y1UutVPA8x--gOwc9GvXzg8Y84tYAQ";
+        let intervalId;
+
+        // Format response function
+        const formatResponse = (data, type) => {
+            if (!data) return '<div class="error">Không có dữ liệu</div>';
+
+            let html = `
+                <div class="status-badge ${data.code === 1 ? 'status-success' : 'status-error'}">
+                    ${data.code === 1 ? 'Thành công' : 'Thất bại'}
+                </div>
+                <div class="result-details">`;
+
+            if (data.code === 1 && data.data) {
+                if (data.data.ItemName) {
+                    html += `<p><strong>Tên vật phẩm:</strong> ${data.data.ItemName}</p>`;
+                }
+                if (data.data.ItemImage) {
+                    html += `<img src="${data.data.ItemImage}" alt="Item Image">`;
+                }
+                if (data.data.CurrOpenTurn !== undefined) {
+                    html += `<p><strong>Lượt mở:</strong> ${data.data.CurrOpenTurn}</p>`;
+                }
+                // Thêm các thông tin khác tùy theo loại request
+                if (type === 'pig') {
+                    // Thêm thông tin đặc biệt cho đập heo
+                } else if (type === 'gift') {
+                    // Thêm thông tin đặc biệt cho tạo lì xì
+                }
+            }
+
+            html += `<p><strong>Thông báo:</strong> ${data.mess}</p>`;
+            html += '</div>';
+
+            return html;
+        };
+
+        // Main request function
+        const sendRequests = (type) => {
+            const ItemID = document.getElementById("itemComboBox").value;
+            const url = "https://apiwebevent.vtcgame.vn/beautetam2025/Event";
+            
+            // Prepare request body based on type
+            const requestBody = {
+                time: type === 'pig' ? 1737855367 : type === 'gift' ? 1737855400 : 1737855428,
+                fromIP: "",
+                sign: type === 'pig' 
+                    ? "101daead06b4f2ef4b064cd65b3ee8db8542788a4af2107d7c6224658b3ded2b"
+                    : type === 'gift'
+                    ? "4ee6ddd402404cdc393e23a7e0524e6b71b82af7f95f98a36f6ecb2529eb25bb"
+                    : "aae59d101e6e399bc95c73aa86dbf6cfbff48dd1b9d4b4c4f158e5920ac1fd62",
+                makerCode: "AUPC_TetAm",
+                func: type === 'pig' 
+                    ? "beat-pig"
+                    : type === 'gift'
+                    ? "item-lucky-create"
+                    : "item-lucky-open",
+                data: type === 'pig' ? {} : { ItemID: ItemID }
+            };
+
+            const responseArea = type === 'pig' 
+                ? "responseArea1" 
+                : type === 'gift'
+                ? "responseArea2"
+                : "responseArea3";
+
+            // Validate input
+            if (!bearerToken || !requestBody) {
+                return alert("Please enter both Bearer Token and Request Body Template.");
+            }
+
+            // Send request
+            fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${bearerToken}`
+                },
+                body: JSON.stringify(requestBody)
+            })
+            .then(res => res.ok ? res.json() : Promise.reject(`HTTP error! Status: ${res.status}`))
+            .then(data => {
+                document.getElementById(responseArea).innerHTML = formatResponse(data, type);
+            })
+            .catch(err => {
+                document.getElementById(responseArea).innerHTML = `
+                    <div class="status-badge status-error">Lỗi</div>
+                    <div class="result-details">
+                        <p>${err}</p>
+                    </div>
+                `;
+            });
+        };
+
+        // Start sending requests at intervals
+        const startSendingRequests = (type) => {
+            intervalId = setInterval(() => sendRequests(type), 1000);
+        };
+
+        // Stop sending requests
+        const stopSendingRequests = () => {
+            clearInterval(intervalId);
+        };
+    </script>
+</body>
+</html>
